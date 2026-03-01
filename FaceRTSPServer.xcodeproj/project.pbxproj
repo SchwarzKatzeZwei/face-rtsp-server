@@ -12,15 +12,20 @@
 		9427E70309498CDBF08B3846 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD59E0EB71DC1D5B631D2753 /* SettingsView.swift */; };
 		99812033B8BD7CDC0C7E876A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CC3340C45202B29152467289 /* Assets.xcassets */; };
 		AA2E8A131538A9001E812EB6 /* RobotState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634D02D1D38A3926613D3D5B /* RobotState.swift */; };
+		B2C3D4E5F6789001B2C3D4E5 /* CameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F67890A1B2C3D4 /* CameraCapture.swift */; };
+		D4E5F67890011223D4E5F678 /* RTSPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F678900112C3D4E5F6 /* RTSPServer.swift */; };
 		F345DFA6C88458867DEC1661 /* EyeShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAF47031FD96334386CAC7E /* EyeShape.swift */; };
 		F3EB1DD40F7AFFCF4C5B2777 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A8C13525269D9F9FAC9D986 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0096DDB5D5C93DB7732319BF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E1F2A3B4C5D6E7F8E1F2A3B4 /* FaceRTSPServer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FaceRTSPServer.entitlements; sourceTree = "<group>"; };
 		0A8C13525269D9F9FAC9D986 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		62C84FC4984CACA89E681303 /* RobotFaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotFaceView.swift; sourceTree = "<group>"; };
 		634D02D1D38A3926613D3D5B /* RobotState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotState.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F67890A1B2C3D4 /* CameraCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCapture.swift; sourceTree = "<group>"; };
+		C3D4E5F678900112C3D4E5F6 /* RTSPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTSPServer.swift; sourceTree = "<group>"; };
 		71CCD365E3A654DA84DBA191 /* FaceRTSPServer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FaceRTSPServer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DAF47031FD96334386CAC7E /* EyeShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeShape.swift; sourceTree = "<group>"; };
 		CC3340C45202B29152467289 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -90,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				0096DDB5D5C93DB7732319BF /* Info.plist */,
+				E1F2A3B4C5D6E7F8E1F2A3B4 /* FaceRTSPServer.entitlements */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -98,6 +104,8 @@
 			isa = PBXGroup;
 			children = (
 				634D02D1D38A3926613D3D5B /* RobotState.swift */,
+				A1B2C3D4E5F67890A1B2C3D4 /* CameraCapture.swift */,
+				C3D4E5F678900112C3D4E5F6 /* RTSPServer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -173,6 +181,8 @@
 			files = (
 				1226BE6DF366B5CBDA5783CD /* RobotFaceApp.swift in Sources */,
 				AA2E8A131538A9001E812EB6 /* RobotState.swift in Sources */,
+				B2C3D4E5F6789001B2C3D4E5 /* CameraCapture.swift in Sources */,
+				D4E5F67890011223D4E5F678 /* RTSPServer.swift in Sources */,
 				F345DFA6C88458867DEC1661 /* EyeShape.swift in Sources */,
 				F3EB1DD40F7AFFCF4C5B2777 /* ContentView.swift in Sources */,
 				02F6BF6B7ECDA0374B96933B /* RobotFaceView.swift in Sources */,
@@ -187,8 +197,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;				CODE_SIGN_ENTITLEMENTS = FaceRTSPServer/FaceRTSPServer.entitlements;				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5MNA63YAQ5;
 				ENABLE_PREVIEWS = YES;
@@ -221,8 +230,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;				CODE_SIGN_ENTITLEMENTS = FaceRTSPServer/FaceRTSPServer.entitlements;				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5MNA63YAQ5;
 				ENABLE_PREVIEWS = YES;

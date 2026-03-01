@@ -60,9 +60,11 @@ struct ContentView: View {
         .onAppear {
             disableIdleTimer()
             appState.startUptimeTracking()
+            appState.startStreaming()
         }
         .onDisappear {
             appState.stopUptimeTracking()
+            appState.stopStreaming()
         }
     }
 

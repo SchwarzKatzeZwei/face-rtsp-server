@@ -4,6 +4,7 @@
 
 import SwiftUI
 import Darwin
+import AVFoundation
 
 // MARK: - 口の表示タイプ
 
@@ -325,7 +326,7 @@ final class RobotAppState {
     var networkStatus: NetworkStatus = .connected
     var ipAddress: String = getLocalIPAddress()
     var rtspPort: Int = 8554
-    var ssid: String = "RobotNetwork"
+    var ssid: String = "---"
 
     // MARK: - カメラ設定
     var resolution: VideoResolution = .hd720
@@ -416,5 +417,64 @@ final class RobotAppState {
     func stopUptimeTracking() {
         uptimeTimer?.invalidate()
         uptimeTimer = nil
+    }
+
+    // MARK: - RTSP サーバー管理
+
+    private let cameraCapture = CameraCapture()
+    private let rtspServer    = RTSPServer()
+
+    /// カメラキャプチャ + RTSP サーバーを起動する
+    /// onAppear から呼ぶ
+    func startStreaming() {
+        // IP アドレスを最新化
+        ipAddress = getLocalIPAddress()
+
+        // RTSPServer に CameraCapture を渡し、コールバックを設定
+        rtspServer.cameraCapture = cameraCapture
+
+        rtspServer.onClientCountChanged = { [weak self] count in
+            guard let self else { return }
+            let newCount = count
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                let prev = self.connectedClientCount
+                self.connectedClientCount = newCount
+                if newCount > prev {
+                    self.triggerWinkOnConnect()
+                }
+                self.streamingStatus = newCount > 0 ? .streaming : .idle
+            }
+        }
+
+        rtspServer.onError = { [weak self] msg in
+            Task { @MainActor [weak self] in
+                self?.streamingStatus = .error
+            }
+        }
+
+        // エンコード済みフレームを RTSP サーバーに転送
+        cameraCapture.onEncodedFrame = { [weak self] nalUnits, isKeyFrame, pts in
+            self?.rtspServer.deliverFrame(nalUnits, isKeyFrame: isKeyFrame, pts: pts)
+        }
+
+        // カメラ設定 → RTSP サーバー起動
+        Task {
+            do {
+                try await cameraCapture.configure(resolution: resolution, frameRate: frameRate)
+                try rtspServer.start(port: UInt16(rtspPort))
+                cameraCapture.start()
+                await MainActor.run { self.streamingStatus = .idle }
+            } catch {
+                await MainActor.run { self.streamingStatus = .error }
+            }
+        }
+    }
+
+    func stopStreaming() {
+        cameraCapture.stop()
+        rtspServer.stop()
+        streamingStatus = .idle
+        connectedClientCount = 0
     }
 }

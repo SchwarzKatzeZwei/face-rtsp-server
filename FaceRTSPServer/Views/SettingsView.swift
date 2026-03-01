@@ -143,7 +143,7 @@ struct SettingsView: View {
                 }
             }
 
-            // SSID
+            // SSID（手動入力）
             HStack {
                 Label {
                     Text("SSID")
@@ -151,8 +151,10 @@ struct SettingsView: View {
                     SettingsIcon(systemName: "antenna.radiowaves.left.and.right", background: .green)
                 }
                 Spacer()
-                Text(appState.ssid)
+                TextField("Wi-Fi名を入力", text: $appState.ssid)
+                    .multilineTextAlignment(.trailing)
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: 180)
             }
 
             // IPアドレス
@@ -180,7 +182,7 @@ struct SettingsView: View {
                     )
                 }
                 Spacer()
-                Text("\(appState.rtspPort)")
+                Text(verbatim: String(appState.rtspPort))
                     .font(.system(.body, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
