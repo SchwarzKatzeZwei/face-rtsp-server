@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Face App - UI Design Preview</title>
+    <style>
+        :root {
+            --bg-dark: #000000;
+            --eye-white: #ffffff;
+            --eye-cyan: #00e5ff;
+            --eye-green: #4caf50;
+            --eye-red: #f44336;
+            --eye-orange: #ff9800;
+            --eye-blue: #66ccff;
+            --eye-gray: #b0b0b0;
+            --sparkle-yellow: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 24px 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+
+        /* ===== Navigation Tabs ===== */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            background: #16213e;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.8);
+        }
+        .tab-btn.active {
+            background: #0f3460;
+            color: #00e5ff;
+        }
+
+        /* ===== Sections ===== */
+        .section {
+            display: none;
+            padding: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section.active {
+            display: block;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #00e5ff;
+        }
+        .section-desc {
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* ===== Face Preview ===== */
+        .face-preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .iphone-frame {
+            width: 320px;
+            height: 693px;
+            border: 4px solid #333;
+            border-radius: 48px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .iphone-notch {
+            width: 160px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            border: 2px solid #222;
+            border-top: none;
+        }
+        .face-canvas {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .eyes-container {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== Eye Styles ===== */
+        .eye {
+            width: 90px;
+            height: 65px;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .eye-normal {
+            background: var(--eye-white);
+            box-shadow: 0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(255,255,255,0.1);
+        }
+        .eye-happy {
+            background: var(--eye-cyan);
+            border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+            box-shadow: 0 0 30px rgba(0,229,255,0.4), 0 0 60px rgba(0,229,255,0.15);
+        }
+        .eye-sleepy {
+            background: var(--eye-gray);
+            height: 25px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(176,176,176,0.2);
+        }
+        .eye-surprised {
+            background: var(--eye-white);
+            width: 105px;
+            height: 80px;
+            box-shadow: 0 0 40px rgba(255,255,255,0.4), 0 0 80px rgba(255,255,255,0.15);
+        }
+        .eye-error {
+            background: transparent;
+            width: 80px;
+            height: 65px;
+            border-radius: 0;
+        }
+        .eye-error::before,
+        .eye-error::after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 10px;
+            background: var(--eye-red);
+            top: 50%;
+            left: 50%;
+            border-radius: 3px;
+            box-shadow: 0 0 20px rgba(244,67,54,0.5);
+        }
+        .eye-error::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .eye-error::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        .eye-lowbattery {
+            background: var(--eye-orange);
+            height: 20px;
+            border-radius: 50%;
+            transform: translateY(6px);
+            box-shadow: 0 0 20px rgba(255,152,0,0.3);
+        }
+        .eye-cleaning {
+            background: var(--eye-green);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 0 0 30px rgba(76,175,80,0.4), 0 0 60px rgba(76,175,80,0.15);
+        }
+        .eye-charging {
+            background: var(--eye-blue);
+            height: 30px;
+            border-radius: 50%;
+            box-shadow: 0 0 25px rgba(102,204,255,0.3);
+        }
+        .eye-wink-closed {
+            background: var(--eye-cyan);
+            height: 6px;
+            border-radius: 50%;
+            transform: translateY(15px);
+            border-radius: 0 0 50% 50% / 0 0 100% 100%;
+        }
+
+        /* Eye highlight */
+        .eye-highlight {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: rgba(255,255,255,0.85);
+            border-radius: 50%;
+            top: 15%;
+            left: 22%;
+            filter: blur(1px);
+            pointer-events: none;
+        }
+        .eye-highlight-small {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            top: 45%;
+            right: 22%;
+            filter: blur(1px);
+            pointer-events: none;
+        }
+
+        /* Blink animation */
+        @keyframes blink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            95%, 97% { transform: scaleY(0.05); }
+        }
+        .blinking .eye {
+            animation: blink 4s ease-in-out infinite;
+        }
+
+        /* Mouth */
+        .mouth {
+            margin-top: 30px;
+            transition: all 0.4s;
+        }
+        .mouth-smile {
+            width: 40px;
+            height: 20px;
+            border: 3px solid;
+            border-color: transparent transparent var(--eye-cyan) transparent;
+            border-radius: 0 0 50% 50%;
+        }
+        .mouth-surprised {
+            width: 20px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+        }
+        .mouth-hidden {
+            display: none;
+        }
+
+        /* Sparkle effect */
+        @keyframes sparkle-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes sparkle-pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .sparkles {
+            position: absolute;
+            width: 280px;
+            height: 200px;
+            pointer-events: none;
+            animation: sparkle-rotate 6s linear infinite;
+        }
+        .sparkle {
+            position: absolute;
+            font-size: 16px;
+            animation: sparkle-pulse 1.5s ease-in-out infinite;
+        }
+        .sparkle:nth-child(1) { top: 5%; left: 10%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 10%; right: 10%; animation-delay: 0.5s; }
+        .sparkle:nth-child(3) { bottom: 10%; left: 50%; animation-delay: 1s; }
+
+        /* Debug overlay */
+        .debug-overlay {
+            position: absolute;
+            top: 50px;
+            right: 12px;
+            background: rgba(30,30,30,0.85);
+            backdrop-filter: blur(10px);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 9px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .debug-overlay .label {
+            color: rgba(255,255,255,0.4);
+            margin-right: 6px;
+        }
+        .debug-overlay .value {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* ===== Emotion Control Panel ===== */
+        .emotion-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 500px;
+        }
+        .emotion-btn {
+            padding: 10px 18px;
+            border: 2px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .emotion-btn:hover {
+            background: rgba(0,229,255,0.1);
+            border-color: rgba(0,229,255,0.3);
+        }
+        .emotion-btn.active {
+            background: rgba(0,229,255,0.2);
+            border-color: #00e5ff;
+            color: #00e5ff;
+        }
+
+        /* ===== Emotion Grid ===== */
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .emotion-card {
+            background: #111;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+        .emotion-card:hover {
+            border-color: rgba(0,229,255,0.3);
+            transform: translateY(-2px);
+        }
+        .emotion-card .mini-eyes {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+            height: 50px;
+        }
+        .emotion-card .mini-eye {
+            width: 40px;
+            height: 28px;
+        }
+        .emotion-card .label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+        }
+
+        /* ===== Settings Screen ===== */
+        .settings-frame {
+            width: 320px;
+            height: 693px;
+            border: 4px solid #333;
+            border-radius: 48px;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .settings-content {
+            padding: 48px 0 20px;
+            height: 100%;
+            overflow-y: auto;
+            background: #1c1c1e;
+        }
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .settings-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+        .settings-done-btn {
+            color: #0a84ff;
+            font-size: 17px;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .settings-section {
+            margin-top: 20px;
+        }
+        .settings-section-header {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            padding: 0 16px 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .settings-section-footer {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            padding: 6px 16px 0;
+            line-height: 1.5;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #2c2c2e;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .settings-row:first-child {
+            border-radius: 10px 10px 0 0;
+        }
+        .settings-row:last-child {
+            border-radius: 0 0 10px 10px;
+            border-bottom: none;
+        }
+        .settings-row:only-child {
+            border-radius: 10px;
+        }
+        .settings-group {
+            margin: 0 16px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .settings-row .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .settings-row .row-label {
+            font-size: 15px;
+            flex: 1;
+        }
+        .settings-row .row-value {
+            color: rgba(255,255,255,0.4);
+            font-size: 15px;
+        }
+        .settings-row .row-value.mono {
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 13px;
+        }
+        .icon-video { background: #5856d6; }
+        .icon-network { background: #34c759; }
+        .icon-stream { background: #ff9500; }
+        .icon-system { background: #007aff; }
+        .icon-display { background: #af52de; }
+        .icon-debug { background: #ff3b30; }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-green { background: #34c759; }
+        .status-red { background: #ff3b30; }
+        .status-orange { background: #ff9500; }
+
+        .toggle-track {
+            width: 44px;
+            height: 26px;
+            border-radius: 13px;
+            background: #34c759;
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle-track.off {
+            background: #636366;
+        }
+        .toggle-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #fff;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        .toggle-track.off .toggle-thumb {
+            right: auto;
+            left: 2px;
+        }
+
+        .url-box {
+            background: #1c1c1e;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 11px;
+            color: #0a84ff;
+            margin-top: 8px;
+            word-break: break-all;
+        }
+
+        /* ===== Screen flow diagram ===== */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: 32px 0;
+        }
+        .flow-arrow {
+            font-size: 28px;
+            color: rgba(255,255,255,0.3);
+        }
+        .flow-box {
+            text-align: center;
+        }
+        .flow-box .label {
+            margin-top: 12px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+        .flow-box .sublabel {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 4px;
+        }
+
+        /* ===== Mini phone frames ===== */
+        .mini-phone {
+            width: 140px;
+            height: 280px;
+            border: 3px solid #333;
+            border-radius: 24px;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+        .mini-phone .mini-notch {
+            width: 70px;
+            height: 16px;
+            background: #000;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            border: 1px solid #222;
+            border-top: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .section { padding: 16px; }
+            .iphone-frame { width: 280px; height: 606px; }
+            .settings-frame { width: 280px; height: 606px; }
+            .flow-container { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Robot Face App - UI Design Spec</h1>
+    <p>iOS 18+ / Swift 6 / SwiftUI</p>
+</div>
+
+<nav class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('face')">Face Screen</button>
+    <button class="tab-btn" onclick="showTab('emotions')">Emotion List</button>
+    <button class="tab-btn" onclick="showTab('settings')">Settings Screen</button>
+    <button class="tab-btn" onclick="showTab('flow')">Screen Flow</button>
+</nav>
+
+<!-- ===== Face Screen Tab ===== -->
+<div id="tab-face" class="section active">
+    <h2 class="section-title">Face Display Screen (RobotFaceView)</h2>
+    <p class="section-desc">
+        The main screen that serves as the robot's "face". Displayed fullscreen with a black background.
+        Eyes animate with blinking, emotion changes, and streaming status feedback.
+        No system text is displayed except in debug mode.
+    </p>
+
+    <div class="face-preview-container">
+        <div class="iphone-frame">
+            <div class="iphone-notch"></div>
+            <div class="face-canvas blinking" id="face-canvas">
+                <div class="sparkles" id="sparkles" style="display:none">
+                    <span class="sparkle">&#10022;</span>
+                    <span class="sparkle">&#10022;</span>
+                    <span class="sparkle">&#10022;</span>
+                </div>
+                <div class="eyes-container" id="eyes-container">
+                    <div class="eye eye-normal" id="left-eye">
+                        <div class="eye-highlight"></div>
+                        <div class="eye-highlight-small"></div>
+                    </div>
+                    <div class="eye eye-normal" id="right-eye">
+                        <div class="eye-highlight"></div>
+                        <div class="eye-highlight-small"></div>
+                    </div>
+                </div>
+                <div class="mouth mouth-hidden" id="mouth"></div>
+                <div class="debug-overlay" id="debug-overlay" style="display:none">
+                    <div><span class="label">IP</span><span class="value">192.168.1.100</span></div>
+                    <div><span class="label">RTSP</span><span class="value">rtsp://192.168.1.100:8554/live</span></div>
+                    <div><span class="label">Status</span><span class="value" id="debug-status">Idle</span></div>
+                    <div><span class="label">Clients</span><span class="value">0</span></div>
+                    <div><span class="label">Resolution</span><span class="value">720p</span></div>
+                    <div><span class="label">FPS</span><span class="value">15 fps</span></div>
+                    <div><span class="label">Battery</span><span class="value">85%</span></div>
+                    <div><span class="label">Temp</span><span class="value">38.0C</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="emotion-panel">
+            <button class="emotion-btn active" onclick="setEmotion('normal')">Normal</button>
+            <button class="emotion-btn" onclick="setEmotion('happy')">Happy</button>
+            <button class="emotion-btn" onclick="setEmotion('sleepy')">Sleepy</button>
+            <button class="emotion-btn" onclick="setEmotion('surprised')">Surprised</button>
+            <button class="emotion-btn" onclick="setEmotion('wink')">Wink (RTSP)</button>
+            <button class="emotion-btn" onclick="setEmotion('error')">Error</button>
+            <button class="emotion-btn" onclick="setEmotion('lowbattery')">Low Battery</button>
+            <button class="emotion-btn" onclick="setEmotion('cleaning')">Cleaning</button>
+            <button class="emotion-btn" onclick="setEmotion('charging')">Charging</button>
+            <button class="emotion-btn" onclick="toggleDebug()">Toggle Debug</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Emotion List Tab ===== -->
+<div id="tab-emotions" class="section">
+    <h2 class="section-title">Emotion / Expression Patterns</h2>
+    <p class="section-desc">
+        All available robot expressions. Each emotion maps to specific eye shape, color, size, and animation parameters.
+        Emotions are automatically selected based on system state (network, battery, streaming).
+    </p>
+
+    <div class="emotion-grid">
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-normal" style="width:40px;height:28px">
+                    <div class="eye-highlight" style="width:9px;height:9px;top:15%;left:22%"></div>
+                </div>
+                <div class="mini-eye eye eye-normal" style="width:40px;height:28px">
+                    <div class="eye-highlight" style="width:9px;height:9px;top:15%;left:22%"></div>
+                </div>
+            </div>
+            <div class="label">Normal (Default)</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">White / Round / Blink</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-happy" style="width:40px;height:28px"></div>
+                <div class="mini-eye eye eye-happy" style="width:40px;height:28px"></div>
+            </div>
+            <div class="label">Happy (Streaming)</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Cyan / Arc / Smile</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-sleepy" style="width:40px"></div>
+                <div class="mini-eye eye eye-sleepy" style="width:40px"></div>
+            </div>
+            <div class="label">Sleepy</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Gray / Half-closed</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-surprised" style="width:48px;height:36px">
+                    <div class="eye-highlight" style="width:11px;height:11px;top:12%;left:20%"></div>
+                </div>
+                <div class="mini-eye eye eye-surprised" style="width:48px;height:36px">
+                    <div class="eye-highlight" style="width:11px;height:11px;top:12%;left:20%"></div>
+                </div>
+            </div>
+            <div class="label">Surprised</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">White / Large / Open</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-normal" style="width:40px;height:28px">
+                    <div class="eye-highlight" style="width:9px;height:9px;top:15%;left:22%"></div>
+                </div>
+                <div class="mini-eye eye eye-wink-closed" style="width:40px;height:6px"></div>
+            </div>
+            <div class="label">Wink (RTSP Connected)</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Cyan / One eye closed</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-error" style="width:36px;height:28px"></div>
+                <div class="mini-eye eye eye-error" style="width:36px;height:28px"></div>
+            </div>
+            <div class="label">Error (Disconnect)</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Red / Cross mark</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-lowbattery" style="width:40px"></div>
+                <div class="mini-eye eye eye-lowbattery" style="width:40px"></div>
+            </div>
+            <div class="label">Low Battery</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Orange / Droopy</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-cleaning" style="width:40px;height:28px"></div>
+                <div class="mini-eye eye eye-cleaning" style="width:40px;height:28px"></div>
+            </div>
+            <div class="label">Cleaning</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Green / Sparkle / Arc</div>
+        </div>
+
+        <div class="emotion-card">
+            <div class="mini-eyes">
+                <div class="mini-eye eye eye-charging" style="width:40px"></div>
+                <div class="mini-eye eye eye-charging" style="width:40px"></div>
+            </div>
+            <div class="label">Charging</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Light Blue / Relaxed</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Settings Screen Tab ===== -->
+<div id="tab-settings" class="section">
+    <h2 class="section-title">Settings Screen (SettingsView)</h2>
+    <p class="section-desc">
+        Accessible via triple-tap on the top-right corner of the face screen.
+        Provides video configuration, network information, streaming status, and debug tools.
+        Presented as a modal sheet overlay.
+    </p>
+
+    <div class="face-preview-container">
+        <div class="settings-frame">
+            <div class="iphone-notch"></div>
+            <div class="settings-content">
+                <div class="settings-header">
+                    <div style="width:50px"></div>
+                    <h2>Settings</h2>
+                    <button class="settings-done-btn">Done</button>
+                </div>
+
+                <!-- Video Settings -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <span style="font-size:11px">&#127909;</span> Video Settings
+                    </div>
+                    <div class="settings-group">
+                        <div class="settings-row">
+                            <span class="icon icon-video">&#128249;</span>
+                            <span class="row-label">Resolution</span>
+                            <span class="row-value">720p (1280x720) &#9662;</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-video">&#9201;</span>
+                            <span class="row-label">Frame Rate</span>
+                            <span class="row-value">15 fps &#9662;</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-video">&#9881;</span>
+                            <span class="row-label">Encoder</span>
+                            <span class="row-value">H.264 (HW)</span>
+                        </div>
+                    </div>
+                    <div class="settings-section-footer">
+                        Lowering resolution reduces power consumption and heat generation.
+                    </div>
+                </div>
+
+                <!-- Network -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <span style="font-size:11px">&#128225;</span> Network
+                    </div>
+                    <div class="settings-group">
+                        <div class="settings-row">
+                            <span class="icon icon-network">&#128246;</span>
+                            <span class="row-label">Wi-Fi</span>
+                            <span class="row-value"><span class="status-dot status-green"></span>Connected</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-network">&#128225;</span>
+                            <span class="row-label">SSID</span>
+                            <span class="row-value">RobotNetwork</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-network">#</span>
+                            <span class="row-label">IP Address</span>
+                            <span class="row-value mono">192.168.1.100</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-network">&#128225;</span>
+                            <span class="row-label">RTSP Port</span>
+                            <span class="row-value mono">8554</span>
+                        </div>
+                        <div class="settings-row" style="flex-direction:column;align-items:flex-start">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <span class="icon icon-network">&#128279;</span>
+                                <span class="row-label">Streaming URL</span>
+                            </div>
+                            <div class="url-box">rtsp://192.168.1.100:8554/live</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RTSP Streaming -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <span style="font-size:11px">&#9654;</span> RTSP Streaming
+                    </div>
+                    <div class="settings-group">
+                        <div class="settings-row">
+                            <span class="icon icon-stream">&#128225;</span>
+                            <span class="row-label">Status</span>
+                            <span class="row-value"><span class="status-dot status-green"></span>Streaming</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-stream">&#128100;</span>
+                            <span class="row-label">Clients</span>
+                            <span class="row-value">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <span style="font-size:11px">&#9881;</span> System
+                    </div>
+                    <div class="settings-group">
+                        <div class="settings-row">
+                            <span class="icon icon-system">&#128267;</span>
+                            <span class="row-label">Battery</span>
+                            <span class="row-value">&#9889; 85%</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-system">&#127777;</span>
+                            <span class="row-label">CPU Temp</span>
+                            <span class="row-value">38.0 C</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-system">&#128339;</span>
+                            <span class="row-label">Uptime</span>
+                            <span class="row-value mono">02:34:15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <span style="font-size:11px">&#128065;</span> Display
+                    </div>
+                    <div class="settings-group">
+                        <div class="settings-row">
+                            <span class="icon icon-display">&#128578;</span>
+                            <span class="row-label">Expression Preview</span>
+                            <span class="row-value">Normal &#10095;</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-display">&#128027;</span>
+                            <span class="row-label">Debug Info</span>
+                            <div class="toggle-track off">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section-footer">
+                        Enabling debug info displays system information on the face screen. Disable for production use.
+                    </div>
+                </div>
+
+                <!-- Debug -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <span style="font-size:11px">&#128295;</span> Debug
+                    </div>
+                    <div class="settings-group">
+                        <div class="settings-row">
+                            <span class="icon icon-debug">&#128260;</span>
+                            <span class="row-label" style="color:#0a84ff">Restart RTSP</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-debug">&#128247;</span>
+                            <span class="row-label" style="color:#0a84ff">Restart Camera</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="icon icon-debug">&#128260;</span>
+                            <span class="row-label" style="color:#ff3b30">Reset App</span>
+                        </div>
+                    </div>
+                    <div class="settings-section-footer">
+                        These operations are for debugging and troubleshooting only.
+                    </div>
+                </div>
+
+                <div style="height:40px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Screen Flow Tab ===== -->
+<div id="tab-flow" class="section">
+    <h2 class="section-title">Screen Flow & Navigation</h2>
+    <p class="section-desc">
+        The app has a simple two-screen structure. The face screen is always the primary view.
+        Settings are accessed via a hidden triple-tap gesture on the top-right corner and presented as a modal sheet.
+        In production (Guided Access / Single App Mode), the settings gesture is disabled at OS level.
+    </p>
+
+    <div class="flow-container">
+        <div class="flow-box">
+            <div class="mini-phone">
+                <div class="mini-notch"></div>
+                <div style="width:100%;height:100%;background:#000;display:flex;justify-content:center;align-items:center">
+                    <div style="display:flex;gap:16px">
+                        <div style="width:28px;height:20px;background:#fff;border-radius:50%"></div>
+                        <div style="width:28px;height:20px;background:#fff;border-radius:50%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="label">RobotFaceView</div>
+            <div class="sublabel">Main Screen (Always visible)</div>
+        </div>
+
+        <div class="flow-arrow">&#8594;</div>
+
+        <div class="flow-box">
+            <div style="text-align:center;padding:20px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px dashed rgba(255,255,255,0.15)">
+                <div style="font-size:24px;margin-bottom:8px">&#9758; x3</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.4)">Triple-tap<br>top-right corner</div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">&#8594;</div>
+
+        <div class="flow-box">
+            <div class="mini-phone">
+                <div class="mini-notch"></div>
+                <div style="width:100%;height:100%;background:#1c1c1e;padding:30px 8px 8px">
+                    <div style="text-align:center;font-size:10px;font-weight:700;margin-bottom:8px">Settings</div>
+                    <div style="background:#2c2c2e;border-radius:6px;padding:4px 6px;margin-bottom:4px;font-size:7px;display:flex;justify-content:space-between">
+                        <span>Resolution</span><span style="color:rgba(255,255,255,0.4)">720p</span>
+                    </div>
+                    <div style="background:#2c2c2e;border-radius:6px;padding:4px 6px;margin-bottom:4px;font-size:7px;display:flex;justify-content:space-between">
+                        <span>Frame Rate</span><span style="color:rgba(255,255,255,0.4)">15fps</span>
+                    </div>
+                    <div style="background:#2c2c2e;border-radius:6px;padding:4px 6px;margin-bottom:4px;font-size:7px;display:flex;justify-content:space-between">
+                        <span>Wi-Fi</span><span style="color:#34c759">Connected</span>
+                    </div>
+                    <div style="background:#2c2c2e;border-radius:6px;padding:4px 6px;margin-bottom:4px;font-size:7px;display:flex;justify-content:space-between">
+                        <span>IP</span><span style="color:rgba(255,255,255,0.4);font-family:monospace">192.168.1.100</span>
+                    </div>
+                    <div style="background:#2c2c2e;border-radius:6px;padding:4px 6px;margin-bottom:8px;font-size:7px;display:flex;justify-content:space-between">
+                        <span>RTSP</span><span style="color:#34c759">Streaming</span>
+                    </div>
+                    <div style="background:#2c2c2e;border-radius:6px;padding:4px 6px;font-size:7px;color:#0a84ff;text-align:center">
+                        Restart RTSP
+                    </div>
+                </div>
+            </div>
+            <div class="label">SettingsView</div>
+            <div class="sublabel">Modal Sheet (.sheet)</div>
+        </div>
+    </div>
+
+    <!-- State machine diagram -->
+    <h3 style="margin-top:48px;margin-bottom:16px;font-size:18px">Automatic Emotion State Machine</h3>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;overflow-x:auto">
+        <pre style="font-family:'SF Mono','Menlo',monospace;font-size:12px;line-height:2;color:rgba(255,255,255,0.7);white-space:pre;min-width:500px">
+  System State Check (Priority Order)
+  ====================================
+
+  networkStatus == .disconnected  ---->  .error     (Red X eyes)
+          |
+          v (connected)
+  batteryLevel < 0.1             ---->  .lowBattery (Orange droopy)
+          |
+          v (battery OK)
+  isCharging == true             ---->  .charging   (Light blue relaxed)
+          |
+          v (not charging)
+  streamingStatus == .streaming  ---->  .happy      (Cyan smile)
+          |
+          v (not streaming)
+  streamingStatus == .error      ---->  .error      (Red X eyes)
+          |
+          v (idle)
+  default                        ---->  .normal     (White round)
+
+  Additional Triggers:
+  - RTSP client connects  --->  .wink (momentary)  --->  .happy
+  - Cleaning mode active  --->  .cleaning (Green sparkle)
+        </pre>
+    </div>
+
+    <!-- File structure -->
+    <h3 style="margin-top:48px;margin-bottom:16px;font-size:18px">SwiftUI File Structure</h3>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px">
+        <pre style="font-family:'SF Mono','Menlo',monospace;font-size:12px;line-height:1.8;color:rgba(255,255,255,0.7)">
+spec/UI/
+  |-- RobotFaceApp.swift              # @main App entry point
+  |
+  |-- Models/
+  |     |-- RobotState.swift           # RobotEmotion, StreamingStatus,
+  |                                    # NetworkStatus, VideoResolution,
+  |                                    # VideoFrameRate, RobotAppState
+  |
+  |-- Views/
+  |     |-- ContentView.swift          # Root view + hidden gesture
+  |     |-- RobotFaceView.swift        # Main face display screen
+  |     |-- SettingsView.swift         # Settings modal + EmotionPicker
+  |
+  |-- Components/
+  |     |-- EyeShape.swift             # EyeShape, CrossEyeShape,
+  |                                    # EyeHighlight, SingleEyeView,
+  |                                    # SparkleEffect
+  |
+  |-- Preview/
+        |-- preview.html               # This interactive preview
+        </pre>
+    </div>
+</div>
+
+<script>
+    // Tab navigation
+    function showTab(name) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // Emotion state
+    let currentEmotion = 'normal';
+    let debugVisible = false;
+
+    function setEmotion(emotion) {
+        currentEmotion = emotion;
+
+        // Update buttons
+        document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const leftEye = document.getElementById('left-eye');
+        const rightEye = document.getElementById('right-eye');
+        const mouth = document.getElementById('mouth');
+        const canvas = document.getElementById('face-canvas');
+        const sparkles = document.getElementById('sparkles');
+
+        // Reset classes
+        leftEye.className = 'eye';
+        rightEye.className = 'eye';
+        mouth.className = 'mouth';
+        sparkles.style.display = 'none';
+
+        // Clear inner highlights
+        leftEye.innerHTML = '';
+        rightEye.innerHTML = '';
+
+        const highlight = '<div class="eye-highlight"></div><div class="eye-highlight-small"></div>';
+
+        // Remove blinking for error state
+        canvas.classList.toggle('blinking', emotion !== 'error');
+
+        switch(emotion) {
+            case 'normal':
+                leftEye.classList.add('eye-normal');
+                rightEye.classList.add('eye-normal');
+                leftEye.innerHTML = highlight;
+                rightEye.innerHTML = highlight;
+                mouth.classList.add('mouth-hidden');
+                break;
+            case 'happy':
+                leftEye.classList.add('eye-happy');
+                rightEye.classList.add('eye-happy');
+                mouth.className = 'mouth mouth-smile';
+                break;
+            case 'sleepy':
+                leftEye.classList.add('eye-sleepy');
+                rightEye.classList.add('eye-sleepy');
+                mouth.classList.add('mouth-hidden');
+                break;
+            case 'surprised':
+                leftEye.classList.add('eye-surprised');
+                rightEye.classList.add('eye-surprised');
+                leftEye.innerHTML = highlight;
+                rightEye.innerHTML = highlight;
+                mouth.className = 'mouth mouth-surprised';
+                break;
+            case 'wink':
+                leftEye.classList.add('eye-normal');
+                leftEye.innerHTML = highlight;
+                rightEye.classList.add('eye-wink-closed');
+                mouth.classList.add('mouth-hidden');
+                break;
+            case 'error':
+                leftEye.classList.add('eye-error');
+                rightEye.classList.add('eye-error');
+                mouth.classList.add('mouth-hidden');
+                break;
+            case 'lowbattery':
+                leftEye.classList.add('eye-lowbattery');
+                rightEye.classList.add('eye-lowbattery');
+                mouth.classList.add('mouth-hidden');
+                break;
+            case 'cleaning':
+                leftEye.classList.add('eye-cleaning');
+                rightEye.classList.add('eye-cleaning');
+                sparkles.style.display = 'block';
+                mouth.className = 'mouth mouth-smile';
+                mouth.style.borderColor = 'transparent transparent #4caf50 transparent';
+                break;
+            case 'charging':
+                leftEye.classList.add('eye-charging');
+                rightEye.classList.add('eye-charging');
+                mouth.classList.add('mouth-hidden');
+                break;
+        }
+    }
+
+    function toggleDebug() {
+        debugVisible = !debugVisible;
+        document.getElementById('debug-overlay').style.display = debugVisible ? 'block' : 'none';
+    }
+</script>
+
+</body>
+</html>
