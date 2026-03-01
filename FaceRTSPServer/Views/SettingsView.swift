@@ -6,6 +6,13 @@
 // 映像設定、ネットワーク情報、デバッグ機能を提供する。
 // 運用時はアクセスガイドにより通常アクセスできない前提だが、
 // デバッグ・初期セットアップ時に使用する。
+//
+// preview.html の Settings Screen Tab を忠実に再現:
+//   - .settings-content: 背景 #1c1c1e
+//   - .settings-header: "Settings" + "Done" ボタン
+//   - セクション: Video Settings / Network / RTSP Streaming / System / Display / Debug
+//   - .settings-row: iOS標準の grouped list 行スタイル
+//   - .icon-*: 各セクションのアイコン背景色
 
 import SwiftUI
 
@@ -61,28 +68,48 @@ struct SettingsView: View {
     }
 
     // MARK: - 映像設定セクション
+    // preview.html: Video Settings / icon-video (#5856d6 purple)
 
     private var videoSettingsSection: some View {
         Section {
             // 解像度選択
-            Picker("映像解像度", selection: $appState.resolution) {
+            // preview.html: 📹 Resolution → "720p (1280x720) ▾"
+            Picker(selection: $appState.resolution) {
                 ForEach(VideoResolution.allCases) { resolution in
                     Text(resolution.rawValue).tag(resolution)
+                }
+            } label: {
+                Label {
+                    Text("映像解像度")
+                } icon: {
+                    SettingsIcon(systemName: "video.fill", background: .purple)
                 }
             }
             .pickerStyle(.menu)
 
             // フレームレート選択
-            Picker("フレームレート", selection: $appState.frameRate) {
+            // preview.html: ⏱ Frame Rate → "15 fps ▾"
+            Picker(selection: $appState.frameRate) {
                 ForEach(VideoFrameRate.allCases) { fps in
                     Text(fps.displayName).tag(fps)
+                }
+            } label: {
+                Label {
+                    Text("フレームレート")
+                } icon: {
+                    SettingsIcon(systemName: "clock.fill", background: .purple)
                 }
             }
             .pickerStyle(.menu)
 
             // エンコード情報（読み取り専用）
+            // preview.html: ⚙ Encoder → "H.264 (HW)"
             HStack {
-                Label("エンコーダー", systemImage: "cpu")
+                Label {
+                    Text("エンコーダー")
+                } icon: {
+                    SettingsIcon(systemName: "cpu", background: .purple)
+                }
                 Spacer()
                 Text("H.264 (Hardware)")
                     .foregroundStyle(.secondary)
@@ -95,12 +122,17 @@ struct SettingsView: View {
     }
 
     // MARK: - ネットワーク情報セクション
+    // preview.html: Network / icon-network (#34c759 green)
 
     private var networkInfoSection: some View {
         Section {
             // Wi-Fi接続状態
             HStack {
-                Label("Wi-Fi", systemImage: "wifi")
+                Label {
+                    Text("Wi-Fi")
+                } icon: {
+                    SettingsIcon(systemName: "wifi", background: .green)
+                }
                 Spacer()
                 HStack(spacing: 6) {
                     Circle()
@@ -111,17 +143,27 @@ struct SettingsView: View {
                 }
             }
 
-            // SSID
+            // SSID（手動入力）
             HStack {
-                Label("SSID", systemImage: "network")
+                Label {
+                    Text("SSID")
+                } icon: {
+                    SettingsIcon(systemName: "antenna.radiowaves.left.and.right", background: .green)
+                }
                 Spacer()
-                Text(appState.ssid)
+                TextField("Wi-Fi名を入力", text: $appState.ssid)
+                    .multilineTextAlignment(.trailing)
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: 180)
             }
 
             // IPアドレス
             HStack {
-                Label("IPアドレス", systemImage: "number")
+                Label {
+                    Text("IPアドレス")
+                } icon: {
+                    SettingsIcon(systemName: "number", background: .green)
+                }
                 Spacer()
                 Text(appState.ipAddress)
                     .font(.system(.body, design: .monospaced))
@@ -131,21 +173,34 @@ struct SettingsView: View {
 
             // RTSPポート
             HStack {
-                Label("RTSPポート", systemImage: "antenna.radiowaves.left.and.right")
+                Label {
+                    Text("RTSPポート")
+                } icon: {
+                    SettingsIcon(
+                        systemName: "antenna.radiowaves.left.and.right",
+                        background: .green
+                    )
+                }
                 Spacer()
-                Text("\(appState.rtspPort)")
+                Text(verbatim: String(appState.rtspPort))
                     .font(.system(.body, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
 
             // RTSP URL（コピー可能）
+            // preview.html: .url-box { background: #1c1c1e; color: #0a84ff; }
             VStack(alignment: .leading, spacing: 6) {
-                Label("配信URL", systemImage: "link")
+                Label {
+                    Text("配信URL")
+                } icon: {
+                    SettingsIcon(systemName: "link", background: .green)
+                }
                 Text(appState.rtspURL)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.blue)
                     .textSelection(.enabled)
                     .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
             }
@@ -155,12 +210,20 @@ struct SettingsView: View {
     }
 
     // MARK: - RTSP配信ステータスセクション
+    // preview.html: RTSP Streaming / icon-stream (#ff9500 orange)
 
     private var streamingStatusSection: some View {
         Section {
             // 配信状態
             HStack {
-                Label("配信状態", systemImage: "dot.radiowaves.left.and.right")
+                Label {
+                    Text("配信状態")
+                } icon: {
+                    SettingsIcon(
+                        systemName: "dot.radiowaves.left.and.right",
+                        background: .orange
+                    )
+                }
                 Spacer()
                 HStack(spacing: 6) {
                     Circle()
@@ -173,7 +236,11 @@ struct SettingsView: View {
 
             // 接続クライアント数
             HStack {
-                Label("接続クライアント数", systemImage: "person.2")
+                Label {
+                    Text("接続クライアント数")
+                } icon: {
+                    SettingsIcon(systemName: "person.fill", background: .orange)
+                }
                 Spacer()
                 Text("\(appState.connectedClientCount)")
                     .foregroundStyle(.secondary)
@@ -184,12 +251,17 @@ struct SettingsView: View {
     }
 
     // MARK: - システム情報セクション
+    // preview.html: System / icon-system (#007aff blue)
 
     private var systemInfoSection: some View {
         Section {
             // バッテリー
             HStack {
-                Label("バッテリー", systemImage: batteryIcon)
+                Label {
+                    Text("バッテリー")
+                } icon: {
+                    SettingsIcon(systemName: batteryIcon, background: .blue)
+                }
                 Spacer()
                 HStack(spacing: 4) {
                     if appState.isCharging {
@@ -204,7 +276,11 @@ struct SettingsView: View {
 
             // CPU温度
             HStack {
-                Label("CPU温度", systemImage: "thermometer.medium")
+                Label {
+                    Text("CPU温度")
+                } icon: {
+                    SettingsIcon(systemName: "thermometer.medium", background: .blue)
+                }
                 Spacer()
                 Text(String(format: "%.1f℃", appState.cpuTemperature))
                     .foregroundStyle(temperatureColor)
@@ -212,7 +288,11 @@ struct SettingsView: View {
 
             // 稼働時間
             HStack {
-                Label("稼働時間", systemImage: "clock")
+                Label {
+                    Text("稼働時間")
+                } icon: {
+                    SettingsIcon(systemName: "clock", background: .blue)
+                }
                 Spacer()
                 Text(appState.uptimeDisplay)
                     .font(.system(.body, design: .monospaced))
@@ -224,15 +304,24 @@ struct SettingsView: View {
     }
 
     // MARK: - 表示設定セクション
+    // preview.html: Display / icon-display (#af52de purple)
 
     private var displaySettingsSection: some View {
         Section {
             // 表情プレビュー＆手動選択
+            // preview.html: 😎 Expression Preview → "Normal >"
             NavigationLink {
                 EmotionPickerView(appState: appState)
             } label: {
                 HStack {
-                    Label("表情プレビュー", systemImage: "face.smiling")
+                    Label {
+                        Text("表情プレビュー")
+                    } icon: {
+                        SettingsIcon(
+                            systemName: "face.smiling",
+                            background: Color(red: 0.686, green: 0.322, blue: 0.871) // #af52de
+                        )
+                    }
                     Spacer()
                     Text(appState.autoEmotion.displayName)
                         .foregroundStyle(.secondary)
@@ -240,8 +329,16 @@ struct SettingsView: View {
             }
 
             // デバッグオーバーレイ
+            // preview.html: 🐛 Debug Info → toggle (off by default)
             Toggle(isOn: $appState.isDebugMode) {
-                Label("デバッグ情報表示", systemImage: "ladybug")
+                Label {
+                    Text("デバッグ情報表示")
+                } icon: {
+                    SettingsIcon(
+                        systemName: "ladybug.fill",
+                        background: Color(red: 0.686, green: 0.322, blue: 0.871) // #af52de
+                    )
+                }
             }
         } header: {
             Label("表示設定", systemImage: "eye")
@@ -251,28 +348,47 @@ struct SettingsView: View {
     }
 
     // MARK: - デバッグセクション
+    // preview.html: Debug / icon-debug (#ff3b30 red)
 
     private var debugSection: some View {
         Section {
             // RTSP配信の再起動
+            // preview.html: 🔄 Restart RTSP (blue text)
             Button {
                 // TODO: RTSP配信の再起動処理
             } label: {
-                Label("RTSP配信を再起動", systemImage: "arrow.clockwise")
+                Label {
+                    Text("RTSP配信を再起動")
+                } icon: {
+                    SettingsIcon(systemName: "arrow.clockwise", background: .red)
+                }
             }
 
             // カメラセッションの再起動
+            // preview.html: 📷 Restart Camera (blue text)
             Button {
                 // TODO: カメラセッションの再起動処理
             } label: {
-                Label("カメラセッションを再起動", systemImage: "camera")
+                Label {
+                    Text("カメラセッションを再起動")
+                } icon: {
+                    SettingsIcon(systemName: "camera.fill", background: .red)
+                }
             }
 
             // アプリ全体のリセット
+            // preview.html: 🔄 Reset App (red text)
             Button(role: .destructive) {
                 showResetConfirmation = true
             } label: {
-                Label("アプリをリセット", systemImage: "arrow.counterclockwise")
+                Label {
+                    Text("アプリをリセット")
+                } icon: {
+                    SettingsIcon(
+                        systemName: "arrow.counterclockwise",
+                        background: .red
+                    )
+                }
             }
         } header: {
             Label("デバッグ", systemImage: "wrench.and.screwdriver")
@@ -311,7 +427,32 @@ struct SettingsView: View {
         appState.resolution = .hd720
         appState.frameRate = .fps15
         appState.isDebugMode = false
+        appState.isCleaningMode = false
         appState.currentEmotion = .normal
+        appState.isShowingMomentaryEmotion = false
+    }
+}
+
+// MARK: - 設定行用アイコン
+
+/// preview.html の .settings-row .icon に対応する色付きアイコン
+/// 各セクションのアイコン背景色:
+///   - icon-video:   #5856d6 (purple)
+///   - icon-network: #34c759 (green)
+///   - icon-stream:  #ff9500 (orange)
+///   - icon-system:  #007aff (blue)
+///   - icon-display: #af52de (purple)
+///   - icon-debug:   #ff3b30 (red)
+struct SettingsIcon: View {
+    let systemName: String
+    let background: Color
+
+    var body: some View {
+        Image(systemName: systemName)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 28, height: 28)
+            .background(background, in: RoundedRectangle(cornerRadius: 6))
     }
 }
 
