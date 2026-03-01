@@ -22,7 +22,7 @@ struct RobotFaceView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let eyeSize = min(geometry.size.width, geometry.size.height) * 0.32
+            let eyeSize = min(geometry.size.width, geometry.size.height) * 0.40
             let eyeSpacing = eyeSize * 0.55
 
             ZStack {
@@ -33,7 +33,6 @@ struct RobotFaceView: View {
                 // ── 目の配置 ──
                 VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: geometry.size.height * 0.05)
 
                     HStack(spacing: eyeSpacing) {
                         // 左目

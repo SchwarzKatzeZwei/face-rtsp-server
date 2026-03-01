@@ -3,6 +3,7 @@
 // iOS 18+ / Swift 6 / SwiftUI
 
 import SwiftUI
+import Darwin
 
 // MARK: - ロボットの感情・表情状態
 
@@ -192,12 +193,40 @@ enum VideoFrameRate: Int, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - ローカルIPアドレス取得
+
+/// デバイスのWi-Fi (en0) IPv4アドレスを返す。取得できない場合は "0.0.0.0"
+private func getLocalIPAddress() -> String {
+    var result = "0.0.0.0"
+    var ifaddr: UnsafeMutablePointer<ifaddrs>?
+    guard getifaddrs(&ifaddr) == 0 else { return result }
+    defer { freeifaddrs(ifaddr) }
+    var ptr = ifaddr
+    while let interface = ptr {
+        let family = interface.pointee.ifa_addr.pointee.sa_family
+        if family == UInt8(AF_INET) {
+            let name = String(cString: interface.pointee.ifa_name)
+            if name == "en0" {
+                var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                getnameinfo(
+                    interface.pointee.ifa_addr,
+                    socklen_t(interface.pointee.ifa_addr.pointee.sa_len),
+                    &hostname, socklen_t(hostname.count),
+                    nil, 0, NI_NUMERICHOST
+                )
+                result = String(cString: hostname)
+            }
+        }
+        ptr = interface.pointee.ifa_next
+    }
+    return result
+}
+
 // MARK: - アプリ全体の状態を管理するViewModel
 
 /// アプリ全体の状態を管理する Observable クラス
 /// @MainActor で UI スレッドの安全性を保証
-@MainActor
-@Observable
+@MainActor @Observable
 final class RobotAppState {
     // MARK: - 表情・UI状態
     var currentEmotion: RobotEmotion = .normal
@@ -209,7 +238,7 @@ final class RobotAppState {
 
     // MARK: - ネットワーク状態
     var networkStatus: NetworkStatus = .connected
-    var ipAddress: String = "192.168.1.100"
+    var ipAddress: String = getLocalIPAddress()
     var rtspPort: Int = 8554
     var ssid: String = "RobotNetwork"
 

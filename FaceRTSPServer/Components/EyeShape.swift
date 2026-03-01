@@ -218,10 +218,10 @@ struct SparkleEffect: View {
                     .font(.system(size: size * 0.08))
                     .foregroundStyle(.yellow)
                     .offset(
-                        x: cos(angle) * radius,
-                        y: sin(angle) * radius
+                        x: CGFloat(cos(angle)) * radius,
+                        y: CGFloat(sin(angle)) * radius
                     )
-                    .opacity(0.6 + 0.4 * sin(sparklePhase * 3 + CGFloat(index)))
+                    .opacity(0.6 + 0.4 * Double(sin(sparklePhase * 3 + CGFloat(index))))
             }
         }
         .onAppear {
