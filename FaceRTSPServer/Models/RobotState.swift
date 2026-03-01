@@ -5,6 +5,7 @@
 import SwiftUI
 import Darwin
 import AVFoundation
+import UIKit
 
 // MARK: - 口の表示タイプ
 
@@ -333,9 +334,9 @@ final class RobotAppState {
     var frameRate: VideoFrameRate = .fps15
 
     // MARK: - システム状態
-    var batteryLevel: Float = 0.85    // 0.0 ~ 1.0
+    var batteryLevel: Float = 1.0     // 0.0 ~ 1.0  (UIDevice から取得)
     var isCharging: Bool = false
-    var cpuTemperature: Float = 38.0  // ℃
+    var thermalState: ProcessInfo.ThermalState = .nominal  // 全体の熱状態
     var uptimeSeconds: TimeInterval = 0
 
     // MARK: - 表示設定
@@ -353,6 +354,17 @@ final class RobotAppState {
     /// RTSP配信URL
     var rtspURL: String {
         "rtsp://\(ipAddress):\(rtspPort)/live"
+    }
+
+    /// 熱状態の日本語表示名
+    var thermalStateDisplayName: String {
+        switch thermalState {
+        case .nominal:  return "正常"
+        case .fair:     return "やや上昇"
+        case .serious:  return "高温"
+        case .critical: return "危険"
+        @unknown default: return "不明"
+        }
     }
 
     /// 稼働時間の表示用文字列
@@ -400,6 +412,58 @@ final class RobotAppState {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.isShowingMomentaryEmotion = false
         }
+    }
+
+    // MARK: - システム監視（バッテリー・熱状態）
+
+    private var systemMonitorObservers: [NSObjectProtocol] = []
+
+    /// バッテリーと熱状態のリアルタイム監視を開始する
+    func startSystemMonitoring() {
+        // バッテリー監視を有効化して初期値を取得
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        updateBatteryState()
+        thermalState = ProcessInfo.processInfo.thermalState
+
+        // バッテリー残量の変化
+        let levelObs = NotificationCenter.default.addObserver(
+            forName: UIDevice.batteryLevelDidChangeNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.updateBatteryState() }
+        }
+        // バッテリー充電状態の変化
+        let stateObs = NotificationCenter.default.addObserver(
+            forName: UIDevice.batteryStateDidChangeNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.updateBatteryState() }
+        }
+        // 熱状態の変化（CPU / Media Engine / GPU 含む全体）
+        let thermalObs = NotificationCenter.default.addObserver(
+            forName: ProcessInfo.thermalStateDidChangeNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.thermalState = ProcessInfo.processInfo.thermalState
+            }
+        }
+        systemMonitorObservers = [levelObs, stateObs, thermalObs]
+    }
+
+    /// システム監視を停止する
+    func stopSystemMonitoring() {
+        systemMonitorObservers.forEach { NotificationCenter.default.removeObserver($0) }
+        systemMonitorObservers = []
+        UIDevice.current.isBatteryMonitoringEnabled = false
+    }
+
+    /// UIDevice からバッテリー状態を読み取って反映する
+    private func updateBatteryState() {
+        let level = UIDevice.current.batteryLevel
+        batteryLevel = level >= 0 ? level : 1.0   // -1.0 は取得不可時
+        isCharging = UIDevice.current.batteryState == .charging
+                  || UIDevice.current.batteryState == .full
     }
 
     /// アプリの稼働時間を更新するためのタイマー開始
@@ -476,5 +540,18 @@ final class RobotAppState {
         rtspServer.stop()
         streamingStatus = .idle
         connectedClientCount = 0
+    }
+
+    /// 解像度またはフレームレートが変更された時にカメラを再構成する
+    func reconfigureCamera() {
+        Task {
+            cameraCapture.stop()
+            do {
+                try await cameraCapture.configure(resolution: resolution, frameRate: frameRate)
+                cameraCapture.start()
+            } catch {
+                await MainActor.run { self.streamingStatus = .error }
+            }
+        }
     }
 }

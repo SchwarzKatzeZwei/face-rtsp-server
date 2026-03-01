@@ -238,7 +238,7 @@ struct DebugOverlayView: View {
                     debugInfoRow("Resolution", appState.resolution.rawValue)
                     debugInfoRow("FPS", appState.frameRate.displayName)
                     debugInfoRow("Battery", "\(Int(appState.batteryLevel * 100))%")
-                    debugInfoRow("Temp", String(format: "%.1f℃", appState.cpuTemperature))
+                    debugInfoRow("Thermal", appState.thermalStateDisplayName)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)

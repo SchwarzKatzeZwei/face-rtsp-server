@@ -57,12 +57,16 @@ struct ContentView: View {
         }
         .statusBarHidden(true)
         .preferredColorScheme(.dark)
+        .onChange(of: appState.resolution) { appState.reconfigureCamera() }
+        .onChange(of: appState.frameRate) { appState.reconfigureCamera() }
         .onAppear {
             disableIdleTimer()
+            appState.startSystemMonitoring()
             appState.startUptimeTracking()
             appState.startStreaming()
         }
         .onDisappear {
+            appState.stopSystemMonitoring()
             appState.stopUptimeTracking()
             appState.stopStreaming()
         }

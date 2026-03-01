@@ -274,15 +274,15 @@ struct SettingsView: View {
                 }
             }
 
-            // CPU温度
+            // 熱状態（CPU / Media Engine / GPU を含むデバイス全体）
             HStack {
                 Label {
-                    Text("CPU温度")
+                    Text("熱状態")
                 } icon: {
                     SettingsIcon(systemName: "thermometer.medium", background: .blue)
                 }
                 Spacer()
-                Text(String(format: "%.1f℃", appState.cpuTemperature))
+                Text(appState.thermalStateDisplayName)
                     .foregroundStyle(temperatureColor)
             }
 
@@ -416,9 +416,12 @@ struct SettingsView: View {
     }
 
     private var temperatureColor: Color {
-        if appState.cpuTemperature > 50 { return .red }
-        if appState.cpuTemperature > 42 { return .orange }
-        return .secondary
+        switch appState.thermalState {
+        case .critical: return .red
+        case .serious:  return .orange
+        case .fair:     return .yellow
+        default:        return .secondary
+        }
     }
 
     // MARK: - Actions

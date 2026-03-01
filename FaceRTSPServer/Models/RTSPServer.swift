@@ -169,7 +169,7 @@ final class RTSPServer: @unchecked Sendable {
 
     // MARK: - Helpers
 
-    private func notifyClientCount() {
+    func notifyClientCount() {
         let count = clients.values.filter { $0.isPlaying }.count
         let cb = onClientCountChanged
         DispatchQueue.main.async { cb?(count) }
@@ -290,7 +290,7 @@ final class RTSPClientSession: @unchecked Sendable {
             state = .playing
             let extra = "Session: \(sessionID)\r\nRTP-Info: url=rtsp://localhost:8554/live/track1;seq=\(rtpSeqNum);rtptime=0\r\n"
             send(rtspResponse(cseq: cseq, extra: extra))
-            // 接続数通知は server 側が onClose コールバックで管理
+            server?.notifyClientCount()
 
         case "TEARDOWN":
             send(rtspResponse(cseq: cseq, extra: "Session: \(sessionID)\r\n"))
