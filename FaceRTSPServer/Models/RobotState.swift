@@ -247,30 +247,28 @@ enum NetworkStatus: String, CaseIterable, Identifiable {
 
 /// 映像解像度の選択肢
 enum VideoResolution: String, CaseIterable, Identifiable {
-    case vga   = "VGA (640×480)"
     case hd720 = "720p (1280×720)"
+    case hd1080 = "1080p (1920×1080)"
 
     var id: String { rawValue }
 
     var width: Int {
         switch self {
-        case .vga:   return 640
-        case .hd720: return 1280
+        case .hd720:   return 1280
+        case .hd1080: return 1920
         }
     }
 
     var height: Int {
         switch self {
-        case .vga:   return 480
-        case .hd720: return 720
+        case .hd720:   return 720
+        case .hd1080: return 1080
         }
     }
 }
 
-/// フレームレートの選択肢
+/// フレームレートの選択肢（30fps のみ対応）
 enum VideoFrameRate: Int, CaseIterable, Identifiable {
-    case fps15 = 15
-    case fps24 = 24
     case fps30 = 30
 
     var id: Int { rawValue }
@@ -331,7 +329,7 @@ final class RobotAppState {
 
     // MARK: - カメラ設定
     var resolution: VideoResolution = .hd720
-    var frameRate: VideoFrameRate = .fps15
+    var frameRate: VideoFrameRate = .fps30
 
     // MARK: - システム状態
     var batteryLevel: Float = 1.0     // 0.0 ~ 1.0  (UIDevice から取得)

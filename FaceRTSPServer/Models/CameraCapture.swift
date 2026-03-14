@@ -118,7 +118,11 @@ final class CameraCapture: NSObject, @unchecked Sendable {
         session.beginConfiguration()
 
         // 解像度プリセット
-        session.sessionPreset = (targetWidth >= 1280) ? .hd1280x720 : .vga640x480
+        if targetWidth >= 1920 {
+            session.sessionPreset = .hd1920x1080
+        } else {
+            session.sessionPreset = .hd1280x720
+        }
 
         // フロントカメラ
         guard let device = AVCaptureDevice.default(
@@ -163,7 +167,7 @@ final class CameraCapture: NSObject, @unchecked Sendable {
         session.addOutput(output)
 
         // 横画面（デフォルト 0°）でそのまま送るため回転なし
-        // エンコーダーの width/height (1280×720) と一致させる
+        // エンコーダーの width/height (1920x1080 または 1280x720) と一致させる
 
         session.commitConfiguration()
         captureSession = session
@@ -191,12 +195,15 @@ final class CameraCapture: NSObject, @unchecked Sendable {
 
         // リアルタイム・低遅延設定
         VTSessionSetProperty(session, key: kVTCompressionPropertyKey_RealTime,            value: kCFBooleanTrue)
-        VTSessionSetProperty(session, key: kVTCompressionPropertyKey_ProfileLevel,         value: kVTProfileLevel_H264_Baseline_3_1)
+        // 1080p 対応のため Profile Level を High 4.1 に設定（Baseline 3.1 は 720p まで）
+        VTSessionSetProperty(session, key: kVTCompressionPropertyKey_ProfileLevel,         value: (targetWidth >= 1920) ? kVTProfileLevel_H264_High_4_1 : kVTProfileLevel_H264_Baseline_3_1)
         VTSessionSetProperty(session, key: kVTCompressionPropertyKey_AllowFrameReordering, value: kCFBooleanFalse)
         VTSessionSetProperty(session, key: kVTCompressionPropertyKey_H264EntropyMode,      value: kVTH264EntropyMode_CABAC)
         VTSessionSetProperty(session, key: kVTCompressionPropertyKey_MaxKeyFrameInterval,  value: NSNumber(value: targetFPS * 2))
         VTSessionSetProperty(session, key: kVTCompressionPropertyKey_ExpectedFrameRate,    value: NSNumber(value: targetFPS))
-        VTSessionSetProperty(session, key: kVTCompressionPropertyKey_AverageBitRate,       value: NSNumber(value: 1_500_000))
+        // 1080p の場合はビットレートを上げる
+        let bitRate = (targetWidth >= 1920) ? 3_000_000 : 1_500_000
+        VTSessionSetProperty(session, key: kVTCompressionPropertyKey_AverageBitRate,       value: NSNumber(value: bitRate))
 
         VTCompressionSessionPrepareToEncodeFrames(session)
         compressionSession = session

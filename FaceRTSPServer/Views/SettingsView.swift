@@ -428,7 +428,7 @@ struct SettingsView: View {
 
     private func resetApp() {
         appState.resolution = .hd720
-        appState.frameRate = .fps15
+        appState.frameRate = .fps30
         appState.isDebugMode = false
         appState.isCleaningMode = false
         appState.currentEmotion = .normal
