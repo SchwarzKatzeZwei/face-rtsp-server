@@ -352,30 +352,6 @@ struct SettingsView: View {
 
     private var debugSection: some View {
         Section {
-            // RTSP配信の再起動
-            // preview.html: 🔄 Restart RTSP (blue text)
-            Button {
-                // TODO: RTSP配信の再起動処理
-            } label: {
-                Label {
-                    Text("RTSP配信を再起動")
-                } icon: {
-                    SettingsIcon(systemName: "arrow.clockwise", background: .red)
-                }
-            }
-
-            // カメラセッションの再起動
-            // preview.html: 📷 Restart Camera (blue text)
-            Button {
-                // TODO: カメラセッションの再起動処理
-            } label: {
-                Label {
-                    Text("カメラセッションを再起動")
-                } icon: {
-                    SettingsIcon(systemName: "camera.fill", background: .red)
-                }
-            }
-
             // アプリ全体のリセット
             // preview.html: 🔄 Reset App (red text)
             Button(role: .destructive) {
@@ -397,7 +373,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Helper Properties
+// MARK: - Helper Properties
 
     private var batteryIcon: String {
         switch appState.batteryLevel {

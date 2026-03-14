@@ -19,6 +19,12 @@ import SwiftUI
 
 struct RobotFaceView: View {
     @Bindable var appState: RobotAppState
+    private var reduceMotion: Bool {
+    // iOS の「動きを減らす」設定をチェック
+    // @Environment(\.reduceMotion) は Swift 6 で型推論に問題があるため、
+    // 代わりに UIAccessibility.isReduceMotionEnabled を使用
+    UIAccessibility.isReduceMotionEnabled
+  }
 
     /// 瞬きタイマーの状態管理
     @State private var blinkTimer: Timer?
@@ -149,6 +155,12 @@ struct RobotFaceView: View {
 
     /// 瞬きアニメーションを実行
     private func performBlink() {
+        // ユーザーが動きを減らすことを希望する場合、アニメーションをスキップ
+        guard !reduceMotion else {
+            scheduleNextBlink()
+            return
+        }
+
         // エラー状態では瞬きしない（preview.html: canvas.classList.toggle('blinking', emotion !== 'error')）
         guard currentEmotion.canBlink else {
             scheduleNextBlink()
@@ -230,7 +242,7 @@ struct DebugOverlayView: View {
         VStack {
             HStack {
                 Spacer()
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 10) {
                     debugInfoRow("IP", appState.ipAddress)
                     debugInfoRow("RTSP", appState.rtspURL)
                     debugInfoRow("Status", appState.streamingStatus.displayName)
@@ -240,8 +252,8 @@ struct DebugOverlayView: View {
                     debugInfoRow("Battery", "\(Int(appState.batteryLevel * 100))%")
                     debugInfoRow("Thermal", appState.thermalStateDisplayName)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color(white: 0.12).opacity(0.85))
@@ -259,13 +271,13 @@ struct DebugOverlayView: View {
 
     @ViewBuilder
     private func debugInfoRow(_ label: String, _ value: String) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             Text(label)
-                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                .font(.system(size: 14, weight: .medium, design: .monospaced))
                 .foregroundStyle(Color.white.opacity(0.4))
             Text(value)
-                .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.8))
+                .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                .foregroundStyle(Color.white.opacity(0.9))
         }
     }
 }
